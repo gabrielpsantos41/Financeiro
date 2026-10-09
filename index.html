@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checklist de Pagamentos e Dívidas</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .alert-banner {
+      background: #fee2e2;
+      border: 1px solid #f87171;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+      text-align: center;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+    .btn-sm { padding: 4px 8px; font-size: 0.75rem; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #15803d; }
+    .btn-warning { background: var(--warning); }
+    .btn-warning:hover { background: #b45309; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { background: #f1f5f9; }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .card.month-completed {
+      border: 2px solid var(--success);
+      background-color: #f0fdf4;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badges-summary {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .card-total {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 16px;
+    }
+
+    .total-pending {
+      color: #1e40af;
+      background: #eff6ff;
+    }
+
+    .total-income {
+      color: #15803d;
+      background: #dcfce7;
+    }
+
+    .total-balance {
+      color: #854d0e;
+      background: #fef9c3;
+    }
+
+    .total-balance.positive {
+      color: #15803d;
+      background: #dcfce7;
+    }
+
+    .total-balance.negative {
+      color: #991b1b;
+      background: #fee2e2;
+    }
+
+    .section-subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 16px 0 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .item:last-child { border-bottom: none; }
+    .item:hover { background-color: rgba(0,0,0,0.02); }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--success);
+    }
+
+    .item-title { font-size: 0.95rem; }
+    .item-value { font-weight: 600; color: var(--text); }
+
+    .completed .item-title,
+    .completed .item-value {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .info-badge {
+      font-size: 0.8rem;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
+      display: inline-block;
+    }
+
+    .badge-pending-inc {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-received-inc {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    .modal h3 { margin-top: 0; color: var(--primary); }
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: flex; gap: 10px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Cronograma de Pagamentos</h1>
+
+    <div id="alert-banner" class="alert-banner"></div>
+
+    <div class="top-actions">
+      <button class="btn btn-outline" onclick="refreshApp()">🔄 Recarregar</button>
+      <button class="btn btn-warning" onclick="openCopyMonthModal()">📋 Copiar Mês Anterior</button>
+      <button class="btn" onclick="openAddMonthModal()">+ Criar Novo Mês</button>
+      <button class="btn btn-danger" onclick="openAddDebtModal()">+ Incluir Nova Dívida</button>
+    </div>
+
+    <div id="app">Carregando dados do banco...</div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBt-6wCGfTUFW4N75A-Z79L85feg7G4cPk",
+      authDomain: "meu-financeiro-8be29.firebaseapp.com",
+      databaseURL: "https://meu-financeiro-8be29-default-rtdb.firebaseio.com",
+      projectId: "meu-financeiro-8be29",
+      storageBucket: "meu-financeiro-8be29.firebasestorage.app",
+      messagingSenderId: "979423543387",
+      appId: "1:979423543387:web:8d3dd86ecf798483847f7e",
+      measurementId: "G-Y49EXPTTY4"
+    };
+
+    const initialScheduleData = [
+      {
+        id: "out26",
+        title: "5 de Outubro",
+        notes: "Avisos do mês",
+        incomes: [
+          { id: "inc_out_1", name: "Salário do Mês", category: "Salário", val: 2600.00, received: false }
+        ],
+        items: [
+          { id: "out_1", title: "Google One Patrick", val: 10.00 },
+          { id: "out_2", title: "Fut mensal Wiliam", val: 50.00 },
+          { id: "out_3", title: "Fut mensal Ralph", val: 40.00 },
+          { id: "out_4", title: "Ingresso Rafael show (2/8)", val: 72.46 },
+          { id: "out_5", title: "Vans azul Patrick (2/2)", val: 125.00 },
+          { id: "out_6", title: "Patrick presente dino (1/2)", val: 60.00 },
+          { id: "out_7", title: "Camisa Patrick (2/3)", val: 105.00 },
+          { id: "out_8", title: "Calças Patrick (3/3)", val: 86.60 },
+          { id: "out_9", title: "Terno do pai e camisas Patrick (4/10) (120 meu)", val: 170.00 },
+          { id: "out_10", title: "Terno e calça carreteiro Natália (4/10)", val: 170.00 },
+          { id: "out_11", title: "Paulinho Notebook (6/6)", val: 333.00 },
+          { id: "out_12", title: "Redes móveis Patrick", val: 40.00 },
+          { id: "out_13", title: "PS5 Patrick (2/10)", val: 396.00 },
+          { id: "out_14", title: "Patrick Switch (4/10)", val: 100.00 },
+          { id: "out_15", title: "Spotify trimestral Patrick", val: 40.00 },
+          { id: "out_16", title: "Cartão Nubank", val: 200.00 }
+        ]
+      },
+      {
+        id: "nov26",
+        title: "5 de Novembro",
+        notes: "Avisos do mês",
+        incomes: [
+          { id: "inc_nov_1", name: "Sônia", category: "Entrada Extra", val: 300.00, received: true },
+          { id: "inc_nov_2", name: "Hermes", category: "Entrada Extra", val: 100.00, received: true }
+        ],
+        items: [
+          { id: "nov_1", title: "Ingresso Rafael show (3/8)", val: 72.46 },
+          { id: "nov_2", title: "Patrick presente dino (2/2)", val: 60.00 },
+          { id: "nov_3", title: "Fut Wiliam", val: 50.00 },
+          { id: "nov_4", title: "PS5 Patrick (3/10)", val: 396.00 },
+          { id: "nov_5", title: "Camisa presente (3/3)", val: 105.00 },
+          { id: "nov_6", title: "Switch Patrick (5/10)", val: 100.00 },
+          { id: "nov_7", title: "Terno do pai e camisas Patrick (5/10) (120 meu)", val: 170.00 },
+          { id: "nov_8", title: "Terno e calça carreteiro Natália (5/10)", val: 170.00 },
+          { id: "nov_9", title: "Redes móveis Patrick", val: 40.00 }
+        ]
+      }
+    ];
+
+    const initialDividasData = [
+      { id: "d_1", name: "Ingresso Foo Fighters (Rafael)", keywords: ["ingresso rafael", "foo fighters"], valorTotal: 579.68, valorParcela: 72.46, parcelaAtual: 1, parcelasTotais: 8, completed: false },
+      { id: "d_2", name: "PS5", keywords: ["ps5"], valorTotal: 3960.00, valorParcela: 396.00, parcelaAtual: 1, parcelasTotais: 10, completed: false },
+      { id: "d_3", name: "Calças Patrick", keywords: ["calças patrick", "calca patrick"], valorTotal: 260.00, valorParcela: 86.60, parcelaAtual: 1, parcelasTotais: 3, completed: false },
+      { id: "d_4", name: "Terno do pai (Larissa)", keywords: ["terno do pai"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_5", name: "Terno e calça carreteiro (Via Veneto)", keywords: ["terno e calça carreteiro", "carreteiro"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_6", name: "Switch", keywords: ["switch"], valorTotal: 1000.00, valorParcela: 100.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_7", name: "Notebook Paulinho", keywords: ["notebook paulinho", "notebook"], valorTotal: 2000.00, valorParcela: 333.00, parcelaAtual: 4, parcelasTotais: 6, completed: false }
+    ];
+
+    let appData = { schedule: [], dividas: [], checks: {} };
+
+    function showAlert(msg) {
+      const banner = document.getElementById("alert-banner");
+      banner.style.display = "block";
+      banner.innerHTML = msg;
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "checklist_app", "main_data");
+
+    // Conexão em Tempo Real
+    onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        appData.schedule = data.schedule || [];
+        appData.dividas = data.dividas || [];
+        appData.checks = data.checks || {};
+      } else {
+        appData = { schedule: initialScheduleData, dividas: initialDividasData, checks: {} };
+        saveToFirebase();
+      }
+      renderApp();
+    }, (err) => {
+      console.error("Erro do Firestore: ", err);
+      showAlert("❌ Erro ao conectar no Firebase: " + err.message);
+    });
+
+    async function saveToFirebase() {
+      try {
+        await setDoc(docRef, {
+          schedule: appData.schedule,
+          dividas: appData.dividas,
+          checks: appData.checks
+        }, { merge: true });
+      } catch (e) {
+        console.error("Erro ao gravar:", e);
+        showAlert("❌ Erro ao salvar no Firebase: " + e.message);
+      }
+    }
+
+    window.refreshApp = () => window.location.reload();
+
+    // GERENCIAMENTO DE RECEBIDOS COM STATUS
+    window.openAddIncomeModal = (monthId) => {
+      modalContent.innerHTML = `
+        <h3>Adicionar Recebido do Mês</h3>
+        <div class="form-group">
+          <label>Nome / Fonte da Renda</label>
+          <input type="text" id="inc-name" placeholder="Ex: Salário, Dividendos, Renda Extra" required />
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="inc-category">
+            <option value="Salário">Salário</option>
+            <option value="Dividendos">Dividendos</option>
+            <option value="Entrada Extra">Entrada Extra</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="inc-val" placeholder="0.00" required />
+        </div>
+        <div class="form-group">
+          <label>Status Inicial</label>
+          <select id="inc-status">
+            <option value="pending">Pendente (a receber)</option>
+            <option value="received">Recebido</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-success" onclick="saveNewIncome('${monthId}')">Salvar Recebido</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.saveNewIncome = async (monthId) => {
+      const name = document.getElementById("inc-name").value.trim();
+      const category = document.getElementById("inc-category").value;
+      const val = parseFloat(document.getElementById("inc-val").value);
+      const status = document.getElementById("inc-status").value;
+
+      if (!name || isNaN(val)) {
+        alert("Preencha o nome e um valor válido.");
+        return;
+      }
+
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (month) {
+        if (!month.incomes) month.incomes = [];
+        month.incomes.push({
+          id: "inc_" + Date.now(),
+          name,
+          category,
+          val,
+          received: status === "received"
+        });
+        await saveToFirebase();
+      }
+      closeModal();
+    };
+
+    window.toggleIncomeStatus = async (monthId, incId) => {
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (month && month.incomes) {
+        const inc = month.incomes.find(r => r.id === incId);
+        if (inc) {
+          inc.received = !inc.received;
+          renderApp();
+          await saveToFirebase();
+        }
+      }
+    };
+
+    window.deleteIncome = async (monthId, incId) => {
+      if (confirm("Deseja remover este recebido do mês?")) {
+        const month = appData.schedule.find(m => m.id === monthId);
+        if (month && month.incomes) {
+          month.incomes = month.incomes.filter(r => r.id !== incId);
+          await saveToFirebase();
+        }
+      }
+    };
+
+    // COPIAR MÊS ANTERIOR
+    window.openCopyMonthModal = () => {
+      if (!appData.schedule || appData.schedule.length === 0) {
+        alert("Não existem meses cadastrados para copiar.");
+        return;
+      }
+
+      const lastMonth = appData.schedule[appData.schedule.length - 1];
+
+      modalContent.innerHTML = `
+        <h3>Copiar Mês: ${lastMonth.title}</h3>
+        <div class="form-group">
+          <label>Nome do Novo Mês (Projeção)</label>
+          <input type="text" id="copy-month-title" placeholder="Ex: 5 de Março / 2027" required />
+        </div>
+        <div class="form-group">
+          <label>Observações/Notas do Novo Mês (Opcional)</label>
+          <input type="text" id="copy-month-notes" value="${lastMonth.notes || ''}" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-warning" onclick="executeCopyMonth('${lastMonth.id}')">Confirmar Cópia</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.executeCopyMonth = async (sourceMonthId) => {
+      const newTitle = document.getElementById("copy-month-title").value.trim();
+      const newNotes = document.getElementById("copy-month-notes").value.trim();
+
+      if (!newTitle) {
+        alert("Por favor, digite o nome do novo mês.");
+        return;
+      }
+
+      const sourceMonth = appData.schedule.find(m => m.id === sourceMonthId);
+      if (!sourceMonth) return;
+
+      const newMonthId = "m_" + Date.now();
+      const copiedItems = [];
+
+      (sourceMonth.items || []).forEach((item, index) => {
+        let updatedTitle = item.title;
+        let shouldCopy = true;
+
+        const titleLower = item.title.toLowerCase();
+
+        const matchedDebt = (appData.dividas || []).find(d => {
+          if (d.keywords && Array.isArray(d.keywords)) {
+            return d.keywords.some(kw => titleLower.includes(kw.toLowerCase()));
+          }
+          return titleLower.includes(d.name.toLowerCase());
+        });
+
+        if (matchedDebt && matchedDebt.completed) {
+          shouldCopy = false;
+        }
+
+        const parcelaMatch = item.title.match(/\((\d+)\/(\d+)\)/);
+        if (parcelaMatch) {
+          const atual = parseInt(parcelaMatch[1]);
+          const total = parseInt(parcelaMatch[2]);
+
+          if (atual >= total) {
+            shouldCopy = false;
+          } else {
+            updatedTitle = item.title.replace(`(${atual}/${total})`, `(${atual + 1}/${total})`);
+          }
+        }
+
+        if (shouldCopy) {
+          copiedItems.push({
+            id: `${newMonthId}_i_${index}_${Date.now()}`,
+            title: updatedTitle,
+            val: item.val
+          });
+        }
+      });
+
+      // Copia recebidos mantendo como Pendentes no novo mês
+      const copiedIncomes = (sourceMonth.incomes || []).map((inc, index) => ({
+        id: `${newMonthId}_inc_${index}_${Date.now()}`,
+        name: inc.name,
+        category: inc.category,
+        val: inc.val,
+        received: false
+      }));
+
+      const newMonthObj = {
+        id: newMonthId,
+        title: newTitle,
+        notes: newNotes,
+        incomes: copiedIncomes,
+        items: copiedItems
+      };
+
+      appData.schedule.push(newMonthObj);
+      await saveToFirebase();
+      closeModal();
+    };
+
+    window.purgeCompletedDebts = async () => {
+      if (confirm("Tem certeza que deseja apagar permanentemente todas as dívidas quitadas do banco?")) {
+        appData.dividas = (appData.dividas || []).filter(d => !d.completed);
+        await saveToFirebase();
+      }
+    };
+
+    window.toggleCheck = async (itemId, itemTitle) => {
+      if (!appData.checks) appData.checks = {};
+
+      const isChecking = !appData.checks[itemId];
+      appData.checks[itemId] = isChecking;
+
+      renderApp();
+
+      const titleLower = itemTitle.toLowerCase();
+      const matchedDebt = (appData.dividas || []).find(d => {
+        if (d.keywords && Array.isArray(d.keywords)) {
+          return d.keywords.some(kw => titleLower.includes(kw.toLowerCase()));
+        }
+        return titleLower.includes(d.name.toLowerCase());
+      });
+
+      if (matchedDebt) {
+        const matchParcela = itemTitle.match(/\((\d+)\/(\d+)\)/);
+
+        if (matchParcela) {
+          const numParcela = parseInt(matchParcela[1]);
+          const totalParcelas = parseInt(matchParcela[2]);
+
+          if (isChecking) {
+            matchedDebt.parcelaAtual = Math.max(matchedDebt.parcelaAtual || 0, numParcela);
+          } else {
+            matchedDebt.parcelaAtual = Math.max(0, (matchedDebt.parcelaAtual || 0) - 1);
+          }
+          matchedDebt.parcelasTotais = totalParcelas;
+        } else {
+          if (isChecking) {
+            matchedDebt.parcelaAtual = Math.min(matchedDebt.parcelasTotais, (matchedDebt.parcelaAtual || 0) + 1);
+          } else {
+            matchedDebt.parcelaAtual = Math.max(0, (matchedDebt.parcelaAtual || 0) - 1);
+          }
+        }
+
+        matchedDebt.completed = matchedDebt.parcelaAtual >= matchedDebt.parcelasTotais && matchedDebt.parcelasTotais > 0;
+      }
+
+      try {
+        await updateDoc(docRef, {
+          [`checks.${itemId}`]: isChecking,
+          dividas: appData.dividas
+        });
+      } catch (e) {
+        await saveToFirebase();
+      }
+    };
+
+    window.toggleDebtStatus = async (debtId) => {
+      const debt = appData.dividas.find(d => d.id === debtId);
+      if (debt) {
+        debt.completed = !debt.completed;
+        if (debt.completed) debt.parcelaAtual = debt.parcelasTotais;
+        await saveToFirebase();
+      }
+    };
+
+    window.updateParcela = async (debtId, step) => {
+      const debt = appData.dividas.find(d => d.id === debtId);
+      if (debt) {
+        debt.parcelaAtual = Math.max(0, Math.min(debt.parcelasTotais, (debt.parcelaAtual || 0) + step));
+        debt.completed = debt.parcelaAtual >= debt.parcelasTotais;
+        await saveToFirebase();
+      }
+    };
+
+    window.deleteDebt = async (debtId) => {
+      if (confirm("Excluir esta dívida?")) {
+        appData.dividas = appData.dividas.filter(d => d.id !== debtId);
+        await saveToFirebase();
+      }
+    };
+
+    window.deleteMonth = async (monthId) => {
+      if (confirm("Remover este mês?")) {
+        appData.schedule = appData.schedule.filter(m => m.id !== monthId);
+        await saveToFirebase();
+      }
+    };
+
+    const modalOverlay = document.getElementById("modal-overlay");
+    const modalContent = document.getElementById("modal-content");
+
+    window.closeModal = () => modalOverlay.style.display = "none";
+
+    window.openAddMonthModal = () => {
+      modalContent.innerHTML = `
+        <h3>Criar Novo Mês</h3>
+        <div class="form-group">
+          <label>Título do Mês</label>
+          <input type="text" id="month-title" required />
+        </div>
+        <div class="form-group">
+          <label>Observações</label>
+          <input type="text" id="month-notes" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn" onclick="saveNewMonth()">Salvar Mês</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.saveNewMonth = async () => {
+      const title = document.getElementById("month-title").value.trim();
+      const notes = document.getElementById("month-notes").value.trim();
+      if (!title) return;
+
+      appData.schedule.push({ id: "m_" + Date.now(), title, notes, incomes: [], items: [] });
+      await saveToFirebase();
+      closeModal();
+    };
+
+    window.openAddItemModal = (monthId) => {
+      modalContent.innerHTML = `
+        <h3>Adicionar Item ao Mês</h3>
+        <div class="form-group">
+          <label>Descrição do Pagamento</label>
+          <input type="text" id="item-title" placeholder="Ex: PS5 Patrick (4/10)" required />
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="item-val" required />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn" onclick="saveNewItem('${monthId}')">Salvar Item</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.saveNewItem = async (monthId) => {
+      const title = document.getElementById("item-title").value.trim();
+      const val = parseFloat(document.getElementById("item-val").value);
+      if (!title || isNaN(val)) return;
+
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (month) {
+        month.items.push({ id: "item_" + Date.now(), title, val });
+        await saveToFirebase();
+      }
+      closeModal();
+    };
+
+    window.openAddDebtModal = () => {
+      modalContent.innerHTML = `
+        <h3>Incluir Nova Dívida</h3>
+        <div class="form-group">
+          <label>Nome da Dívida</label>
+          <input type="text" id="debt-name" placeholder="Ex: PS5" required />
+        </div>
+        <div class="form-group">
+          <label>Palavra-Chave para Identificação Automática</label>
+          <input type="text" id="debt-kw" placeholder="Ex: ps5, ps5 patrick" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Valor Total (R$)</label>
+            <input type="number" step="0.01" id="debt-val-total" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Valor Parcela (R$)</label>
+            <input type="number" step="0.01" id="debt-val-parcela" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Parcela Atual</label>
+            <input type="number" id="debt-p-atual" value="1" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Total Parcelas</label>
+            <input type="number" id="debt-p-total" value="10" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-danger" onclick="saveNewDebt()">Salvar Dívida</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.saveNewDebt = async () => {
+      const name = document.getElementById("debt-name").value.trim();
+      const kwInput = document.getElementById("debt-kw").value.trim();
+      const valTotal = parseFloat(document.getElementById("debt-val-total").value) || 0;
+      const valParcela = parseFloat(document.getElementById("debt-val-parcela").value) || 0;
+      const pAtual = parseInt(document.getElementById("debt-p-atual").value) || 0;
+      const pTotal = parseInt(document.getElementById("debt-p-total").value) || 1;
+
+      if (!name) return;
+
+      const keywords = kwInput ? kwInput.split(",").map(k => k.trim()) : [name.toLowerCase()];
+
+      appData.dividas.push({
+        id: "d_" + Date.now(),
+        name,
+        keywords,
+        valorTotal: valTotal,
+        valorParcela: valParcela,
+        parcelaAtual: pAtual,
+        parcelasTotais: pTotal,
+        completed: pAtual >= pTotal
+      });
+      await saveToFirebase();
+      closeModal();
+    };
+
+    function renderApp() {
+      const container = document.getElementById("app");
+      let html = "";
+
+      const checks = appData.checks || {};
+
+      (appData.schedule || []).forEach(month => {
+        let totalPendente = 0;
+        let totalRecebidoMes = 0;
+        let totalRecebidoConfirmado = 0;
+        let totalItems = month.items ? month.items.length : 0;
+        let checkedCount = 0;
+
+        // Soma recebidos do mês (Totais e Confirmados)
+        (month.incomes || []).forEach(inc => {
+          const val = inc.val || 0;
+          totalRecebidoMes += val;
+          if (inc.received) {
+            totalRecebidoConfirmado += val;
+          }
+        });
+
+        // Soma pendentes a pagar do mês
+        (month.items || []).forEach(item => {
+          if (checks[item.id]) {
+            checkedCount++;
+          } else {
+            totalPendente += item.val;
+          }
+        });
+
+        const saldoMes = totalRecebidoMes - totalPendente;
+        const isMonthCompleted = totalItems > 0 && checkedCount === totalItems;
+
+        html += `
+          <div class="card ${isMonthCompleted ? 'month-completed' : ''}">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">
+                  ${month.title}
+                  ${isMonthCompleted ? '<span style="color:var(--success); font-size:0.8rem;">(✔ QUITADO)</span>' : ''}
+                </h2>
+                ${month.notes ? `<div class="info-badge">${month.notes}</div>` : ''}
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="badges-summary">
+                  <span class="card-total total-income" title="Recebido: R$ ${totalRecebidoConfirmado.toFixed(2).replace('.', ',')}">
+                    Entradas: R$ ${totalRecebidoConfirmado.toFixed(2).replace('.', ',')} / ${totalRecebidoMes.toFixed(2).replace('.', ',')}
+                  </span>
+                  <span class="card-total total-pending">Pendente: R$ ${totalPendente.toFixed(2).replace('.', ',')}</span>
+                  <span class="card-total total-balance ${saldoMes >= 0 ? 'positive' : 'negative'}">
+                    Saldo: R$ ${saldoMes.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="deleteMonth('${month.id}')">✕</button>
+              </div>
+            </div>
+
+            <!-- Seção de Recebidos do Mês -->
+            <div class="section-subtitle" style="color: var(--success);">
+              <span>💰 Recebidos / Rendimentos do Mês</span>
+              <button class="btn btn-success btn-sm" onclick="openAddIncomeModal('${month.id}')">+ Recebido</button>
+            </div>
+            <ul class="item-list" style="margin-bottom: 16px;">
+              ${(month.incomes || []).map(inc => `
+                <li class="item ${inc.received ? 'completed' : ''}">
+                  <div class="item-left">
+                    <input 
+                      type="checkbox" 
+                      ${inc.received ? 'checked' : ''} 
+                      onChange="toggleIncomeStatus('${month.id}', '${inc.id}')"
+                    />
+                    <div>
+                      <span class="item-title" style="font-weight: 600;">${inc.name}</span>
+                      <span class="info-badge ${inc.received ? 'badge-received-inc' : 'badge-pending-inc'}">
+                        ${inc.received ? '✔ Recebido' : '⏳ Pendente'}
+                      </span>
+                      <span class="info-badge">${inc.category || 'Geral'}</span>
+                    </div>
+                  </div>
+                  <div class="actions-cell">
+                    <span class="item-value" style="color: var(--success);">R$ ${(inc.val || 0).toFixed(2).replace('.', ',')}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteIncome('${month.id}', '${inc.id}')">✕</button>
+                  </div>
+                </li>
+              `).join('')}
+              ${(!month.incomes || month.incomes.length === 0) ? '<li class="item" style="color:var(--text-muted); font-size:0.85rem;">Nenhum recebido adicionado neste mês.</li>' : ''}
+            </ul>
+
+            <!-- Seção de Pagamentos do Mês -->
+            <div class="section-subtitle" style="color: var(--primary);">
+              <span>📋 Pagamentos & Dívidas do Mês</span>
+              <button class="btn btn-outline btn-sm" onclick="openAddItemModal('${month.id}')">+ Item</button>
+            </div>
+            <ul class="item-list">
+              ${(month.items || []).map(item => {
+                const isChecked = !!checks[item.id];
+                const safeTitle = item.title.replace(/'/g, "\\'");
+                return `
+                  <li class="item ${isChecked ? 'completed' : ''}">
+                    <div class="item-left">
+                      <input 
+                        type="checkbox" 
+                        ${isChecked ? 'checked' : ''} 
+                        onChange="toggleCheck('${item.id}', '${safeTitle}')"
+                      />
+                      <span class="item-title">${item.title}</span>
+                    </div>
+                    <span class="item-value">R$ ${item.val.toFixed(2).replace('.', ',')}</span>
+                  </li>
+                `;
+              }).join('')}
+              ${(!month.items || month.items.length === 0) ? '<li class="item" style="color:var(--text-muted); font-size:0.85rem;">Nenhum item adicionado.</li>' : ''}
+            </ul>
+          </div>
+        `;
+      });
+
+      // Painel Geral de Dívidas
+      html += `
+        <div class="card" style="border-left: 4px solid var(--danger);">
+          <div class="card-header">
+            <h2 class="card-title" style="color: var(--danger);">Resumo Geral de Dívidas</h2>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-danger btn-sm" onclick="purgeCompletedDebts()">🗑️ Apagar Quitadas</button>
+              <button class="btn btn-success btn-sm" onclick="openAddDebtModal()">+ Nova Dívida</button>
+            </div>
+          </div>
+          <ul class="item-list">
+            ${(appData.dividas || []).map(d => {
+              const valorTot = (d.valorTotal || 0).toFixed(2).replace('.', ',');
+              const valorParc = (d.valorParcela || 0).toFixed(2).replace('.', ',');
+              const pAtual = d.parcelaAtual || 0;
+              const pTotais = d.parcelasTotais || 1;
+              const metaText = `Total: R$ ${valorTot} | Parcela: R$ ${valorParc} (${pAtual}/${pTotais})`;
+
+              return `
+                <li class="item ${d.completed ? 'completed' : ''}">
+                  <div>
+                    <div class="item-title" style="font-weight: 600;">
+                      ${d.name}${d.completed ? '<span style="color:var(--success); font-size:0.8rem;">(Quitada)</span>' : ''}
+                    </div>
+                    <div class="info-badge">${metaText}</div>
+                  </div>
+                  <div class="actions-cell">
+                    <button class="btn btn-outline btn-sm" onclick="updateParcela('${d.id}', -1)">-1 Parcela</button>
+                    <button class="btn btn-outline btn-sm" onclick="updateParcela('${d.id}', 1)">+1 Parcela</button>
+                    <button class="btn ${d.completed ? 'btn-outline' : 'btn-success'} btn-sm" onclick="toggleDebtStatus('${d.id}')">
+                      ${d.completed ? 'Reabrir' : 'Dar Baixa'}
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDebt('${d.id}')">✕</button>
+                  </div>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
