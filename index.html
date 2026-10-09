@@ -16,6 +16,7 @@
       --success: #16a34a;
       --danger: #dc2626;
       --warning: #d97706;
+      --purple: #7c3aed;
     }
 
     body {
@@ -69,6 +70,8 @@
     .btn-success:hover { background: #15803d; }
     .btn-warning { background: var(--warning); }
     .btn-warning:hover { background: #b45309; }
+    .btn-purple { background: var(--purple); }
+    .btn-purple:hover { background: #6d28d9; }
 
     .btn-outline {
       background: transparent;
@@ -217,6 +220,12 @@
       display: inline-block;
     }
 
+    .badge-person {
+      background: #f3e8ff;
+      color: #6b21a8;
+      font-weight: 600;
+    }
+
     .badge-pending-inc {
       background: #fef3c7;
       color: #92400e;
@@ -290,6 +299,7 @@
     <div class="top-actions">
       <button class="btn btn-outline" onclick="refreshApp()">🔄 Recarregar</button>
       <button class="btn btn-warning" onclick="openCopyMonthModal()">📋 Copiar Mês Anterior</button>
+      <button class="btn btn-purple" onclick="openPeopleModal()">👥 Pessoas / Credores</button>
       <button class="btn" onclick="openAddMonthModal()">+ Criar Novo Mês</button>
       <button class="btn btn-danger" onclick="openAddDebtModal()">+ Incluir Nova Dívida</button>
     </div>
@@ -316,6 +326,8 @@
       measurementId: "G-Y49EXPTTY4"
     };
 
+    const initialPeopleData = ["Rafael", "Patrick", "Larissa", "Via Veneto", "Natália", "Paulinho", "Hermes", "Thomas", "Wiliam", "Ralph"];
+
     const initialScheduleData = [
       {
         id: "out26",
@@ -325,57 +337,37 @@
           { id: "inc_out_1", name: "Salário do Mês", category: "Salário", val: 2600.00, received: false }
         ],
         items: [
-          { id: "out_1", title: "Google One Patrick", val: 10.00 },
-          { id: "out_2", title: "Fut mensal Wiliam", val: 50.00 },
-          { id: "out_3", title: "Fut mensal Ralph", val: 40.00 },
-          { id: "out_4", title: "Ingresso Rafael show (2/8)", val: 72.46 },
-          { id: "out_5", title: "Vans azul Patrick (2/2)", val: 125.00 },
-          { id: "out_6", title: "Patrick presente dino (1/2)", val: 60.00 },
-          { id: "out_7", title: "Camisa Patrick (2/3)", val: 105.00 },
-          { id: "out_8", title: "Calças Patrick (3/3)", val: 86.60 },
-          { id: "out_9", title: "Terno do pai e camisas Patrick (4/10) (120 meu)", val: 170.00 },
-          { id: "out_10", title: "Terno e calça carreteiro Natália (4/10)", val: 170.00 },
-          { id: "out_11", title: "Paulinho Notebook (6/6)", val: 333.00 },
-          { id: "out_12", title: "Redes móveis Patrick", val: 40.00 },
-          { id: "out_13", title: "PS5 Patrick (2/10)", val: 396.00 },
-          { id: "out_14", title: "Patrick Switch (4/10)", val: 100.00 },
-          { id: "out_15", title: "Spotify trimestral Patrick", val: 40.00 },
+          { id: "out_1", title: "Google One Patrick", val: 10.00, person: "Patrick" },
+          { id: "out_2", title: "Fut mensal Wiliam", val: 50.00, person: "Wiliam" },
+          { id: "out_3", title: "Fut mensal Ralph", val: 40.00, person: "Ralph" },
+          { id: "out_4", title: "Ingresso Rafael show (2/8)", val: 72.46, person: "Rafael" },
+          { id: "out_5", title: "Vans azul Patrick (2/2)", val: 125.00, person: "Patrick" },
+          { id: "out_6", title: "Patrick presente dino (1/2)", val: 60.00, person: "Patrick" },
+          { id: "out_7", title: "Camisa Patrick (2/3)", val: 105.00, person: "Patrick" },
+          { id: "out_8", title: "Calças Patrick (3/3)", val: 86.60, person: "Patrick" },
+          { id: "out_9", title: "Terno do pai e camisas Patrick (4/10) (120 meu)", val: 170.00, person: "Patrick" },
+          { id: "out_10", title: "Terno e calça carreteiro Natália (4/10)", val: 170.00, person: "Natália" },
+          { id: "out_11", title: "Paulinho Notebook (6/6)", val: 333.00, person: "Paulinho" },
+          { id: "out_12", title: "Redes móveis Patrick", val: 40.00, person: "Patrick" },
+          { id: "out_13", title: "PS5 Patrick (2/10)", val: 396.00, person: "Patrick" },
+          { id: "out_14", title: "Patrick Switch (4/10)", val: 100.00, person: "Patrick" },
+          { id: "out_15", title: "Spotify trimestral Patrick", val: 40.00, person: "Patrick" },
           { id: "out_16", title: "Cartão Nubank", val: 200.00 }
-        ]
-      },
-      {
-        id: "nov26",
-        title: "5 de Novembro",
-        notes: "Avisos do mês",
-        incomes: [
-          { id: "inc_nov_1", name: "Sônia", category: "Entrada Extra", val: 300.00, received: true },
-          { id: "inc_nov_2", name: "Hermes", category: "Entrada Extra", val: 100.00, received: true }
-        ],
-        items: [
-          { id: "nov_1", title: "Ingresso Rafael show (3/8)", val: 72.46 },
-          { id: "nov_2", title: "Patrick presente dino (2/2)", val: 60.00 },
-          { id: "nov_3", title: "Fut Wiliam", val: 50.00 },
-          { id: "nov_4", title: "PS5 Patrick (3/10)", val: 396.00 },
-          { id: "nov_5", title: "Camisa presente (3/3)", val: 105.00 },
-          { id: "nov_6", title: "Switch Patrick (5/10)", val: 100.00 },
-          { id: "nov_7", title: "Terno do pai e camisas Patrick (5/10) (120 meu)", val: 170.00 },
-          { id: "nov_8", title: "Terno e calça carreteiro Natália (5/10)", val: 170.00 },
-          { id: "nov_9", title: "Redes móveis Patrick", val: 40.00 }
         ]
       }
     ];
 
     const initialDividasData = [
-      { id: "d_1", name: "Ingresso Foo Fighters (Rafael)", keywords: ["ingresso rafael", "foo fighters"], valorTotal: 579.68, valorParcela: 72.46, parcelaAtual: 1, parcelasTotais: 8, completed: false },
-      { id: "d_2", name: "PS5", keywords: ["ps5"], valorTotal: 3960.00, valorParcela: 396.00, parcelaAtual: 1, parcelasTotais: 10, completed: false },
-      { id: "d_3", name: "Calças Patrick", keywords: ["calças patrick", "calca patrick"], valorTotal: 260.00, valorParcela: 86.60, parcelaAtual: 1, parcelasTotais: 3, completed: false },
-      { id: "d_4", name: "Terno do pai (Larissa)", keywords: ["terno do pai"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_5", name: "Terno e calça carreteiro (Via Veneto)", keywords: ["terno e calça carreteiro", "carreteiro"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_6", name: "Switch", keywords: ["switch"], valorTotal: 1000.00, valorParcela: 100.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_7", name: "Notebook Paulinho", keywords: ["notebook paulinho", "notebook"], valorTotal: 2000.00, valorParcela: 333.00, parcelaAtual: 4, parcelasTotais: 6, completed: false }
+      { id: "d_1", name: "Ingresso Foo Fighters (Rafael)", person: "Rafael", keywords: ["ingresso rafael", "foo fighters"], valorTotal: 579.68, valorParcela: 72.46, parcelaAtual: 1, parcelasTotais: 8, completed: false },
+      { id: "d_2", name: "PS5", person: "Patrick", keywords: ["ps5"], valorTotal: 3960.00, valorParcela: 396.00, parcelaAtual: 1, parcelasTotais: 10, completed: false },
+      { id: "d_3", name: "Calças Patrick", person: "Patrick", keywords: ["calças patrick", "calca patrick"], valorTotal: 260.00, valorParcela: 86.60, parcelaAtual: 1, parcelasTotais: 3, completed: false },
+      { id: "d_4", name: "Terno do pai (Larissa)", person: "Larissa", keywords: ["terno do pai"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_5", name: "Terno e calça carreteiro (Via Veneto)", person: "Via Veneto", keywords: ["terno e calça carreteiro", "carreteiro"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_6", name: "Switch", person: "Patrick", keywords: ["switch"], valorTotal: 1000.00, valorParcela: 100.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_7", name: "Notebook Paulinho", person: "Paulinho", keywords: ["notebook paulinho", "notebook"], valorTotal: 2000.00, valorParcela: 333.00, parcelaAtual: 4, parcelasTotais: 6, completed: false }
     ];
 
-    let appData = { schedule: [], dividas: [], checks: {} };
+    let appData = { schedule: [], dividas: [], pessoas: [], checks: {} };
 
     function showAlert(msg) {
       const banner = document.getElementById("alert-banner");
@@ -393,9 +385,10 @@
         const data = docSnap.data();
         appData.schedule = data.schedule || [];
         appData.dividas = data.dividas || [];
+        appData.pessoas = data.pessoas || initialPeopleData;
         appData.checks = data.checks || {};
       } else {
-        appData = { schedule: initialScheduleData, dividas: initialDividasData, checks: {} };
+        appData = { schedule: initialScheduleData, dividas: initialDividasData, pessoas: initialPeopleData, checks: {} };
         saveToFirebase();
       }
       renderApp();
@@ -409,6 +402,7 @@
         await setDoc(docRef, {
           schedule: appData.schedule,
           dividas: appData.dividas,
+          pessoas: appData.pessoas,
           checks: appData.checks
         }, { merge: true });
       } catch (e) {
@@ -418,6 +412,405 @@
     }
 
     window.refreshApp = () => window.location.reload();
+
+    // GERENCIAMENTO DE PESSOAS / CREDORES
+    window.openPeopleModal = () => {
+      const listHtml = (appData.pessoas || []).map(p => `
+        <li class="item">
+          <span style="font-weight:600;">👤 ${p}</span>
+          <button class="btn btn-danger btn-sm" onclick="removePerson('${p.replace(/'/g, "\\'")}')">✕ Excluir</button>
+        </li>
+      `).join('');
+
+      modalContent.innerHTML = `
+        <h3>👥 Gerenciar Pessoas / Credores</h3>
+        <div class="form-group">
+          <label>Adicionar Nova Pessoa</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="new-person-name" placeholder="Ex: João, Maria" />
+            <button class="btn btn-purple" onclick="addPerson()">Adicionar</button>
+          </div>
+        </div>
+        <label style="font-weight:600; font-size:0.85rem;">Pessoas Cadastradas:</label>
+        <ul class="item-list" style="max-height:200px; overflow-y:auto; margin-top:8px;">
+          ${listHtml || '<li class="item" style="color:var(--text-muted);">Nenhuma pessoa cadastrada.</li>'}
+        </ul>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Fechar</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.addPerson = async () => {
+      const name = document.getElementById("new-person-name").value.trim();
+      if (!name) return;
+
+      if (!appData.pessoas) appData.pessoas = [];
+      if (!appData.pessoas.includes(name)) {
+        appData.pessoas.push(name);
+        await saveToFirebase();
+        openPeopleModal();
+      } else {
+        alert("Esta pessoa já está cadastrada.");
+      }
+    };
+
+    window.removePerson = async (name) => {
+      if (confirm(`Remover "${name}" da lista de pessoas?`)) {
+        appData.pessoas = (appData.pessoas || []).filter(p => p !== name);
+        await saveToFirebase();
+        openPeopleModal();
+      }
+    };
+
+    // MODAL ADICIONAR ITEM AO MÊS (COM OPÇÃO DE PESSOA)
+    window.openAddItemModal = (monthId) => {
+      const optionsPessoas = (appData.pessoas || []).map(p => `<option value="${p}">${p}</option>`).join('');
+
+      modalContent.innerHTML = `
+        <h3>Adicionar Item ao Mês</h3>
+        <div class="form-group">
+          <label>Descrição do Pagamento</label>
+          <input type="text" id="item-title" placeholder="Ex: PS5 Patrick (4/10)" required />
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="item-val" required />
+        </div>
+        <div class="form-group">
+          <label>Atribuir a (Pessoa/Credor - Opcional)</label>
+          <select id="item-person-select" onchange="toggleCustomItemPerson(this.value)">
+            <option value="">-- Nenhuma pessoa --</option>
+            ${optionsPessoas}
+            <option value="__custom__">+ Outra pessoa (Digitar)...</option>
+          </select>
+          <input type="text" id="item-person-custom" placeholder="Digite o nome da pessoa" style="display:none; margin-top:6px;" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn" onclick="saveNewItem('${monthId}')">Salvar Item</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.toggleCustomItemPerson = (val) => {
+      const customInput = document.getElementById("item-person-custom");
+      if (customInput) {
+        customInput.style.display = val === "__custom__" ? "block" : "none";
+      }
+    };
+
+    window.saveNewItem = async (monthId) => {
+      const title = document.getElementById("item-title").value.trim();
+      const val = parseFloat(document.getElementById("item-val").value);
+      const personSelect = document.getElementById("item-person-select").value;
+      const personCustom = document.getElementById("item-person-custom").value.trim();
+
+      if (!title || isNaN(val)) {
+        alert("Preencha a descrição e um valor válido.");
+        return;
+      }
+
+      let person = personSelect;
+      if (personSelect === "__custom__") {
+        person = personCustom;
+        if (person && !appData.pessoas.includes(person)) {
+          appData.pessoas.push(person);
+        }
+      }
+
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (month) {
+        if (!month.items) month.items = [];
+        month.items.push({
+          id: "item_" + Date.now(),
+          title,
+          val,
+          person: person || ""
+        });
+        await saveToFirebase();
+      }
+      closeModal();
+    };
+
+    // MODAL EDITAR ITEM DO MÊS (COM OPÇÃO DE PESSOA)
+    window.openEditItemModal = (monthId, itemId) => {
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (!month) return;
+      const item = (month.items || []).find(i => i.id === itemId);
+      if (!item) return;
+
+      const optionsPessoas = (appData.pessoas || []).map(p => `
+        <option value="${p}" ${item.person === p ? 'selected' : ''}>${p}</option>
+      `).join('');
+
+      modalContent.innerHTML = `
+        <h3>Editar Item de Pagamento</h3>
+        <div class="form-group">
+          <label>Descrição do Pagamento</label>
+          <input type="text" id="edit-item-title" value="${item.title.replace(/"/g, '&quot;')}" required />
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" step="0.01" id="edit-item-val" value="${item.val}" required />
+        </div>
+        <div class="form-group">
+          <label>Atribuir a (Pessoa/Credor - Opcional)</label>
+          <select id="edit-item-person-select" onchange="toggleCustomEditItemPerson(this.value)">
+            <option value="">-- Nenhuma pessoa --</option>
+            ${optionsPessoas}
+            <option value="__custom__">+ Outra pessoa (Digitar)...</option>
+          </select>
+          <input type="text" id="edit-item-person-custom" placeholder="Digite o nome da pessoa" style="display:none; margin-top:6px;" />
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn" onclick="saveEditItem('${monthId}', '${itemId}')">Salvar Alterações</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.toggleCustomEditItemPerson = (val) => {
+      const customInput = document.getElementById("edit-item-person-custom");
+      if (customInput) {
+        customInput.style.display = val === "__custom__" ? "block" : "none";
+      }
+    };
+
+    window.saveEditItem = async (monthId, itemId) => {
+      const title = document.getElementById("edit-item-title").value.trim();
+      const val = parseFloat(document.getElementById("edit-item-val").value);
+      const personSelect = document.getElementById("edit-item-person-select").value;
+      const personCustom = document.getElementById("edit-item-person-custom").value.trim();
+
+      if (!title || isNaN(val)) {
+        alert("Preencha a descrição e um valor válido.");
+        return;
+      }
+
+      let person = personSelect;
+      if (personSelect === "__custom__") {
+        person = personCustom;
+        if (person && !appData.pessoas.includes(person)) {
+          appData.pessoas.push(person);
+        }
+      }
+
+      const month = appData.schedule.find(m => m.id === monthId);
+      if (month && month.items) {
+        const item = month.items.find(i => i.id === itemId);
+        if (item) {
+          item.title = title;
+          item.val = val;
+          item.person = person || "";
+          await saveToFirebase();
+        }
+      }
+      closeModal();
+    };
+
+    // MODAL ADD DÍVIDA
+    window.openAddDebtModal = () => {
+      const optionsPessoas = (appData.pessoas || []).map(p => `<option value="${p}">${p}</option>`).join('');
+
+      modalContent.innerHTML = `
+        <h3>Incluir Nova Dívida</h3>
+        <div class="form-group">
+          <label>Nome da Dívida</label>
+          <input type="text" id="debt-name" placeholder="Ex: PS5" required />
+        </div>
+        <div class="form-group">
+          <label>Devo para (Pessoa/Credor)</label>
+          <select id="debt-person-select" onchange="toggleCustomPerson(this.value)">
+            <option value="">-- Selecione uma pessoa --</option>
+            ${optionsPessoas}
+            <option value="__custom__">+ Outra pessoa (Digitar)...</option>
+          </select>
+          <input type="text" id="debt-person-custom" placeholder="Digite o nome da pessoa" style="display:none; margin-top:6px;" />
+        </div>
+        <div class="form-group">
+          <label>Palavra-Chave para Identificação Automática</label>
+          <input type="text" id="debt-kw" placeholder="Ex: ps5, ps5 patrick" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Valor Total (R$)</label>
+            <input type="number" step="0.01" id="debt-val-total" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Valor Parcela (R$)</label>
+            <input type="number" step="0.01" id="debt-val-parcela" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Parcela Atual</label>
+            <input type="number" id="debt-p-atual" value="1" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Total Parcelas</label>
+            <input type="number" id="debt-p-total" value="10" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-danger" onclick="saveNewDebt()">Salvar Dívida</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.toggleCustomPerson = (val) => {
+      const customInput = document.getElementById("debt-person-custom");
+      if (customInput) {
+        customInput.style.display = val === "__custom__" ? "block" : "none";
+      }
+    };
+
+    window.saveNewDebt = async () => {
+      const name = document.getElementById("debt-name").value.trim();
+      const personSelect = document.getElementById("debt-person-select").value;
+      const personCustom = document.getElementById("debt-person-custom").value.trim();
+      
+      let person = personSelect;
+      if (personSelect === "__custom__") {
+        person = personCustom;
+        if (person && !appData.pessoas.includes(person)) {
+          appData.pessoas.push(person);
+        }
+      }
+
+      const kwInput = document.getElementById("debt-kw").value.trim();
+      const valTotal = parseFloat(document.getElementById("debt-val-total").value) || 0;
+      const valParcela = parseFloat(document.getElementById("debt-val-parcela").value) || 0;
+      const pAtual = parseInt(document.getElementById("debt-p-atual").value) || 0;
+      const pTotal = parseInt(document.getElementById("debt-p-total").value) || 1;
+
+      if (!name) return;
+
+      const keywords = kwInput ? kwInput.split(",").map(k => k.trim()) : [name.toLowerCase()];
+
+      appData.dividas.push({
+        id: "d_" + Date.now(),
+        name,
+        person: person || "Não especificado",
+        keywords,
+        valorTotal: valTotal,
+        valorParcela: valParcela,
+        parcelaAtual: pAtual,
+        parcelasTotais: pTotal,
+        completed: pAtual >= pTotal
+      });
+      await saveToFirebase();
+      closeModal();
+    };
+
+    // EDITAR DÍVIDA
+    window.openEditDebtModal = (debtId) => {
+      const debt = (appData.dividas || []).find(d => d.id === debtId);
+      if (!debt) return;
+
+      const kwString = (debt.keywords || []).join(", ");
+      const optionsPessoas = (appData.pessoas || []).map(p => `
+        <option value="${p}" ${debt.person === p ? 'selected' : ''}>${p}</option>
+      `).join('');
+
+      modalContent.innerHTML = `
+        <h3>Editar Dívida</h3>
+        <div class="form-group">
+          <label>Nome da Dívida</label>
+          <input type="text" id="edit-debt-name" value="${debt.name.replace(/"/g, '&quot;')}" required />
+        </div>
+        <div class="form-group">
+          <label>Devo para (Pessoa/Credor)</label>
+          <select id="edit-debt-person-select" onchange="toggleCustomPersonEdit(this.value)">
+            <option value="">-- Selecione uma pessoa --</option>
+            ${optionsPessoas}
+            <option value="__custom__">+ Outra pessoa (Digitar)...</option>
+          </select>
+          <input type="text" id="edit-debt-person-custom" placeholder="Digite o nome da pessoa" style="display:none; margin-top:6px;" />
+        </div>
+        <div class="form-group">
+          <label>Palavras-Chave (separadas por vírgula)</label>
+          <input type="text" id="edit-debt-kw" value="${kwString.replace(/"/g, '&quot;')}" />
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Valor Total (R$)</label>
+            <input type="number" step="0.01" id="edit-debt-val-total" value="${debt.valorTotal || 0}" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Valor Parcela (R$)</label>
+            <input type="number" step="0.01" id="edit-debt-val-parcela" value="${debt.valorParcela || 0}" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label>Parcela Atual</label>
+            <input type="number" id="edit-debt-p-atual" value="${debt.parcelaAtual || 0}" />
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Total Parcelas</label>
+            <input type="number" id="edit-debt-p-total" value="${debt.parcelasTotais || 1}" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+          <button class="btn" onclick="saveEditDebt('${debtId}')">Salvar Alterações</button>
+        </div>
+      `;
+      modalOverlay.style.display = "flex";
+    };
+
+    window.toggleCustomPersonEdit = (val) => {
+      const customInput = document.getElementById("edit-debt-person-custom");
+      if (customInput) {
+        customInput.style.display = val === "__custom__" ? "block" : "none";
+      }
+    };
+
+    window.saveEditDebt = async (debtId) => {
+      const name = document.getElementById("edit-debt-name").value.trim();
+      const personSelect = document.getElementById("edit-debt-person-select").value;
+      const personCustom = document.getElementById("edit-debt-person-custom").value.trim();
+
+      let person = personSelect;
+      if (personSelect === "__custom__") {
+        person = personCustom;
+        if (person && !appData.pessoas.includes(person)) {
+          appData.pessoas.push(person);
+        }
+      }
+
+      const kwInput = document.getElementById("edit-debt-kw").value.trim();
+      const valTotal = parseFloat(document.getElementById("edit-debt-val-total").value) || 0;
+      const valParcela = parseFloat(document.getElementById("edit-debt-val-parcela").value) || 0;
+      const pAtual = parseInt(document.getElementById("edit-debt-p-atual").value) || 0;
+      const pTotal = parseInt(document.getElementById("edit-debt-p-total").value) || 1;
+
+      if (!name) {
+        alert("Preencha o nome da dívida.");
+        return;
+      }
+
+      const debt = appData.dividas.find(d => d.id === debtId);
+      if (debt) {
+        debt.name = name;
+        debt.person = person || "Não especificado";
+        debt.keywords = kwInput ? kwInput.split(",").map(k => k.trim()) : [name.toLowerCase()];
+        debt.valorTotal = valTotal;
+        debt.valorParcela = valParcela;
+        debt.parcelaAtual = pAtual;
+        debt.parcelasTotais = pTotal;
+        debt.completed = pAtual >= pTotal;
+
+        await saveToFirebase();
+      }
+      closeModal();
+    };
 
     // GERENCIAMENTO DE RECEBIDOS COM STATUS
     window.openAddIncomeModal = (monthId) => {
@@ -444,7 +837,7 @@
           <label>Status Inicial</label>
           <select id="inc-status">
             <option value="pending">Pendente (a receber)</option>
-            <option value="received">Recebido</option>
+            <option value="received">Recebido de fato</option>
           </select>
         </div>
         <div class="modal-actions">
@@ -578,12 +971,12 @@
           copiedItems.push({
             id: `${newMonthId}_i_${index}_${Date.now()}`,
             title: updatedTitle,
-            val: item.val
+            val: item.val,
+            person: item.person || ""
           });
         }
       });
 
-      // Copia recebidos mantendo como Pendentes no novo mês
       const copiedIncomes = (sourceMonth.incomes || []).map((inc, index) => ({
         id: `${newMonthId}_inc_${index}_${Date.now()}`,
         name: inc.name,
@@ -687,6 +1080,16 @@
       }
     };
 
+    window.deleteItem = async (monthId, itemId) => {
+      if (confirm("Excluir este item de pagamento?")) {
+        const month = appData.schedule.find(m => m.id === monthId);
+        if (month && month.items) {
+          month.items = month.items.filter(i => i.id !== itemId);
+          await saveToFirebase();
+        }
+      }
+    };
+
     window.deleteMonth = async (monthId) => {
       if (confirm("Remover este mês?")) {
         appData.schedule = appData.schedule.filter(m => m.id !== monthId);
@@ -728,103 +1131,6 @@
       closeModal();
     };
 
-    window.openAddItemModal = (monthId) => {
-      modalContent.innerHTML = `
-        <h3>Adicionar Item ao Mês</h3>
-        <div class="form-group">
-          <label>Descrição do Pagamento</label>
-          <input type="text" id="item-title" placeholder="Ex: PS5 Patrick (4/10)" required />
-        </div>
-        <div class="form-group">
-          <label>Valor (R$)</label>
-          <input type="number" step="0.01" id="item-val" required />
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn" onclick="saveNewItem('${monthId}')">Salvar Item</button>
-        </div>
-      `;
-      modalOverlay.style.display = "flex";
-    };
-
-    window.saveNewItem = async (monthId) => {
-      const title = document.getElementById("item-title").value.trim();
-      const val = parseFloat(document.getElementById("item-val").value);
-      if (!title || isNaN(val)) return;
-
-      const month = appData.schedule.find(m => m.id === monthId);
-      if (month) {
-        month.items.push({ id: "item_" + Date.now(), title, val });
-        await saveToFirebase();
-      }
-      closeModal();
-    };
-
-    window.openAddDebtModal = () => {
-      modalContent.innerHTML = `
-        <h3>Incluir Nova Dívida</h3>
-        <div class="form-group">
-          <label>Nome da Dívida</label>
-          <input type="text" id="debt-name" placeholder="Ex: PS5" required />
-        </div>
-        <div class="form-group">
-          <label>Palavra-Chave para Identificação Automática</label>
-          <input type="text" id="debt-kw" placeholder="Ex: ps5, ps5 patrick" />
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex:1;">
-            <label>Valor Total (R$)</label>
-            <input type="number" step="0.01" id="debt-val-total" />
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label>Valor Parcela (R$)</label>
-            <input type="number" step="0.01" id="debt-val-parcela" />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex:1;">
-            <label>Parcela Atual</label>
-            <input type="number" id="debt-p-atual" value="1" />
-          </div>
-          <div class="form-group" style="flex:1;">
-            <label>Total Parcelas</label>
-            <input type="number" id="debt-p-total" value="10" />
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-danger" onclick="saveNewDebt()">Salvar Dívida</button>
-        </div>
-      `;
-      modalOverlay.style.display = "flex";
-    };
-
-    window.saveNewDebt = async () => {
-      const name = document.getElementById("debt-name").value.trim();
-      const kwInput = document.getElementById("debt-kw").value.trim();
-      const valTotal = parseFloat(document.getElementById("debt-val-total").value) || 0;
-      const valParcela = parseFloat(document.getElementById("debt-val-parcela").value) || 0;
-      const pAtual = parseInt(document.getElementById("debt-p-atual").value) || 0;
-      const pTotal = parseInt(document.getElementById("debt-p-total").value) || 1;
-
-      if (!name) return;
-
-      const keywords = kwInput ? kwInput.split(",").map(k => k.trim()) : [name.toLowerCase()];
-
-      appData.dividas.push({
-        id: "d_" + Date.now(),
-        name,
-        keywords,
-        valorTotal: valTotal,
-        valorParcela: valParcela,
-        parcelaAtual: pAtual,
-        parcelasTotais: pTotal,
-        completed: pAtual >= pTotal
-      });
-      await saveToFirebase();
-      closeModal();
-    };
-
     function renderApp() {
       const container = document.getElementById("app");
       let html = "";
@@ -838,7 +1144,6 @@
         let totalItems = month.items ? month.items.length : 0;
         let checkedCount = 0;
 
-        // Soma recebidos do mês (Totais e Confirmados)
         (month.incomes || []).forEach(inc => {
           const val = inc.val || 0;
           totalRecebidoMes += val;
@@ -847,7 +1152,6 @@
           }
         });
 
-        // Soma pendentes a pagar do mês
         (month.items || []).forEach(item => {
           if (checks[item.id]) {
             checkedCount++;
@@ -871,7 +1175,7 @@
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
                 <div class="badges-summary">
-                  <span class="card-total total-income" title="Recebido: R$ ${totalRecebidoConfirmado.toFixed(2).replace('.', ',')}">
+                  <span class="card-total total-income" title="Recebido de fato: R$ ${totalRecebidoConfirmado.toFixed(2).replace('.', ',')}">
                     Entradas: R$ ${totalRecebidoConfirmado.toFixed(2).replace('.', ',')} / ${totalRecebidoMes.toFixed(2).replace('.', ',')}
                   </span>
                   <span class="card-total total-pending">Pendente: R$ ${totalPendente.toFixed(2).replace('.', ',')}</span>
@@ -931,9 +1235,15 @@
                         ${isChecked ? 'checked' : ''} 
                         onChange="toggleCheck('${item.id}', '${safeTitle}')"
                       />
-                      <span class="item-title">${item.title}</span>
+                      <div>
+                        <span class="item-title">${item.title}</span>${item.person ? `<br/><span class="info-badge badge-person">👤 ${item.person}</span>` : ''}
+                      </div>
                     </div>
-                    <span class="item-value">R$ ${item.val.toFixed(2).replace('.', ',')}</span>
+                    <div class="actions-cell">
+                      <span class="item-value">R$ ${item.val.toFixed(2).replace('.', ',')}</span>
+                      <button class="btn btn-outline btn-sm" onclick="openEditItemModal('${month.id}', '${item.id}')" title="Editar item">✎</button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteItem('${month.id}', '${item.id}')" title="Excluir item">✕</button>
+                    </div>
                   </li>
                 `;
               }).join('')}
@@ -967,7 +1277,10 @@
                     <div class="item-title" style="font-weight: 600;">
                       ${d.name}${d.completed ? '<span style="color:var(--success); font-size:0.8rem;">(Quitada)</span>' : ''}
                     </div>
-                    <div class="info-badge">${metaText}</div>
+                    <div>
+                      ${d.person ? `<span class="info-badge badge-person">👤 Devo para: ${d.person}</span>` : ''}
+                      <span class="info-badge">${metaText}</span>
+                    </div>
                   </div>
                   <div class="actions-cell">
                     <button class="btn btn-outline btn-sm" onclick="updateParcela('${d.id}', -1)">-1 Parcela</button>
@@ -975,7 +1288,8 @@
                     <button class="btn ${d.completed ? 'btn-outline' : 'btn-success'} btn-sm" onclick="toggleDebtStatus('${d.id}')">
                       ${d.completed ? 'Reabrir' : 'Dar Baixa'}
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteDebt('${d.id}')">✕</button>
+                    <button class="btn btn-outline btn-sm" onclick="openEditDebtModal('${d.id}')" title="Editar dívida">✎ Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDebt('${d.id}')" title="Excluir dívida">✕</button>
                   </div>
                 </li>
               `;
