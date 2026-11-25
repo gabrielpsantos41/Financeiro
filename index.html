@@ -302,6 +302,9 @@
       <button class="btn btn-purple" onclick="openPeopleModal()">👥 Pessoas / Credores</button>
       <button class="btn" onclick="openAddMonthModal()">+ Criar Novo Mês</button>
       <button class="btn btn-danger" onclick="openAddDebtModal()">+ Incluir Nova Dívida</button>
+      <button class="btn btn-outline" onclick="exportBackup()">💾 Backup</button>
+      <button class="btn btn-outline" onclick="triggerImportBackup()">📂 Restaurar Backup</button>
+      <input type="file" id="import-file-input" accept=".json" style="display:none;" onchange="handleImportBackup(event)" />
     </div>
 
     <div id="app">Carregando dados do banco...</div>
@@ -326,48 +329,60 @@
       measurementId: "G-Y49EXPTTY4"
     };
 
-    const initialPeopleData = ["Rafael", "Patrick", "Larissa", "Via Veneto", "Natália", "Paulinho", "Hermes", "Thomas", "Wiliam", "Ralph"];
+    const initialPeopleData = [
+      "Rafael", "Patrick", "Larissa", "Via Veneto", "Natália", 
+      "Paulinho", "Hermes", "Thomas", "Wiliam", "Ralph", "Cicero", "Victor"
+    ];
 
     const initialScheduleData = [
       {
-        id: "out26",
-        title: "5 de Outubro",
-        notes: "Avisos do mês",
+        id: "nov26",
+        title: "5 de Novembro",
+        notes: "Pendências",
         incomes: [
-          { id: "inc_out_1", name: "Salário do Mês", category: "Salário", val: 2600.00, received: false }
+          { id: "inc_nov_1", name: "Thomas Samsung s10", category: "Dividendos", val: 150.00, received: false },
+          { id: "inc_nov_2", name: "Salario do mês", category: "Salário", val: 2400.00, received: true },
+          { id: "inc_nov_3", name: "Tudo certo Corretora", category: "Entrada Extra", val: 100.00, received: true }
         ],
         items: [
-          { id: "out_1", title: "Google One Patrick", val: 10.00, person: "Patrick" },
-          { id: "out_2", title: "Fut mensal Wiliam", val: 50.00, person: "Wiliam" },
-          { id: "out_3", title: "Fut mensal Ralph", val: 40.00, person: "Ralph" },
-          { id: "out_4", title: "Ingresso Rafael show (2/8)", val: 72.46, person: "Rafael" },
-          { id: "out_5", title: "Vans azul Patrick (2/2)", val: 125.00, person: "Patrick" },
-          { id: "out_6", title: "Patrick presente dino (1/2)", val: 60.00, person: "Patrick" },
-          { id: "out_7", title: "Camisa Patrick (2/3)", val: 105.00, person: "Patrick" },
-          { id: "out_8", title: "Calças Patrick (3/3)", val: 86.60, person: "Patrick" },
-          { id: "out_9", title: "Terno do pai e camisas Patrick (4/10) (120 meu)", val: 170.00, person: "Patrick" },
-          { id: "out_10", title: "Terno e calça carreteiro Natália (4/10)", val: 170.00, person: "Natália" },
-          { id: "out_11", title: "Paulinho Notebook (6/6)", val: 333.00, person: "Paulinho" },
-          { id: "out_12", title: "Redes móveis Patrick", val: 40.00, person: "Patrick" },
-          { id: "out_13", title: "PS5 Patrick (2/10)", val: 396.00, person: "Patrick" },
-          { id: "out_14", title: "Patrick Switch (4/10)", val: 100.00, person: "Patrick" },
-          { id: "out_15", title: "Spotify trimestral Patrick", val: 40.00, person: "Patrick" },
-          { id: "out_16", title: "Cartão Nubank", val: 200.00 }
+          { id: "nov_1", title: "Google One Patrick", val: 10.00, person: "Patrick" },
+          { id: "nov_2", title: "Fut mensal Wiliam", val: 50.00, person: "Wiliam" },
+          { id: "nov_3", title: "Ingresso Rafael show (3/8)", val: 72.46, person: "Rafael" },
+          { id: "nov_4", title: "Patrick presente dino (2/2)", val: 60.00, person: "Patrick" },
+          { id: "nov_5", title: "Camisa Patrick (3/3)", val: 105.00, person: "Patrick" },
+          { id: "nov_6", title: "Terno do pai e camisas Patrick (5/10) (120 meu)", val: 170.00, person: "Patrick" },
+          { id: "nov_7", title: "Terno e calça carreteiro Natália (5/10)", val: 170.00, person: "Natália" },
+          { id: "nov_8", title: "Redes móveis Patrick", val: 40.00, person: "Patrick" },
+          { id: "nov_9", title: "PS5 Patrick (3/10)", val: 396.00, person: "Patrick" },
+          { id: "nov_10", title: "Patrick Switch (5/10)", val: 50.00, person: "Patrick" },
+          { id: "nov_11", title: "Cartão Nubank", val: 465.00, person: "" },
+          { id: "nov_12", title: "Combo Vans (1/3)", val: 133.00, person: "Patrick" },
+          { id: "nov_13", title: "Ajuda do Mês", val: 400.00, person: "Cicero" },
+          { id: "nov_14", title: "Casamento Victor", val: 200.00, person: "" }
         ]
       }
     ];
 
+    const initialChecksData = {
+      "nov_1": true, "nov_2": true, "nov_3": true, "nov_4": true,
+      "nov_5": true, "nov_6": true, "nov_7": true, "nov_8": true,
+      "nov_9": true, "nov_10": true, "nov_11": true, "nov_12": true,
+      "nov_13": true, "nov_14": true
+    };
+
     const initialDividasData = [
-      { id: "d_1", name: "Ingresso Foo Fighters (Rafael)", person: "Rafael", keywords: ["ingresso rafael", "foo fighters"], valorTotal: 579.68, valorParcela: 72.46, parcelaAtual: 1, parcelasTotais: 8, completed: false },
-      { id: "d_2", name: "PS5", person: "Patrick", keywords: ["ps5"], valorTotal: 3960.00, valorParcela: 396.00, parcelaAtual: 1, parcelasTotais: 10, completed: false },
-      { id: "d_3", name: "Calças Patrick", person: "Patrick", keywords: ["calças patrick", "calca patrick"], valorTotal: 260.00, valorParcela: 86.60, parcelaAtual: 1, parcelasTotais: 3, completed: false },
-      { id: "d_4", name: "Terno do pai (Larissa)", person: "Larissa", keywords: ["terno do pai"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_5", name: "Terno e calça carreteiro (Via Veneto)", person: "Via Veneto", keywords: ["terno e calça carreteiro", "carreteiro"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_6", name: "Switch", person: "Patrick", keywords: ["switch"], valorTotal: 1000.00, valorParcela: 100.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
-      { id: "d_7", name: "Notebook Paulinho", person: "Paulinho", keywords: ["notebook paulinho", "notebook"], valorTotal: 2000.00, valorParcela: 333.00, parcelaAtual: 4, parcelasTotais: 6, completed: false }
+      { id: "d_1", name: "Ingresso Foo Fighters (Rafael)", person: "Rafael", keywords: ["ingresso rafael", "foo fighters"], valorTotal: 579.68, valorParcela: 72.46, parcelaAtual: 3, parcelasTotais: 8, completed: false },
+      { id: "d_2", name: "PS5", person: "Patrick", keywords: ["ps5"], valorTotal: 3960.00, valorParcela: 396.00, parcelaAtual: 3, parcelasTotais: 10, completed: false },
+      { id: "d_3", name: "Terno do pai (Larissa)", person: "Larissa", keywords: ["terno do pai"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 5, parcelasTotais: 10, completed: false },
+      { id: "d_4", name: "Terno e calça carreteiro (Via Veneto)", person: "Natália", keywords: ["terno e calça carreteiro", "carreteiro"], valorTotal: 1700.00, valorParcela: 170.00, parcelaAtual: 5, parcelasTotais: 10, completed: false },
+      { id: "d_5", name: "Switch", person: "Patrick", keywords: ["switch"], valorTotal: 1000.00, valorParcela: 50.00, parcelaAtual: 5, parcelasTotais: 10, completed: false },
+      { id: "d_6", name: "Combo Vans", person: "Patrick", keywords: ["combo vans"], valorTotal: 399.00, valorParcela: 133.00, parcelaAtual: 1, parcelasTotais: 3, completed: false },
+      { id: "d_7", name: "Patrick presente dino", person: "Patrick", keywords: ["presente dino"], valorTotal: 120.00, valorParcela: 60.00, parcelaAtual: 2, parcelasTotais: 2, completed: true },
+      { id: "d_8", name: "Camisa Patrick", person: "Patrick", keywords: ["camisa patrick"], valorTotal: 315.00, valorParcela: 105.00, parcelaAtual: 3, parcelasTotais: 3, completed: true }
     ];
 
     let appData = { schedule: [], dividas: [], pessoas: [], checks: {} };
+    let isLoadedFromServer = false;
 
     function showAlert(msg) {
       const banner = document.getElementById("alert-banner");
@@ -379,32 +394,41 @@
     const db = getFirestore(app);
     const docRef = doc(db, "checklist_app", "main_data");
 
-    // Conexão em Tempo Real
-    onSnapshot(docRef, (docSnap) => {
+    onSnapshot(docRef, { includeMetadataChanges: true }, (docSnap) => {
+      if (docSnap.metadata.fromCache && !docSnap.exists()) return;
+
       if (docSnap.exists()) {
         const data = docSnap.data();
         appData.schedule = data.schedule || [];
         appData.dividas = data.dividas || [];
         appData.pessoas = data.pessoas || initialPeopleData;
         appData.checks = data.checks || {};
-      } else {
-        appData = { schedule: initialScheduleData, dividas: initialDividasData, pessoas: initialPeopleData, checks: {} };
+        isLoadedFromServer = true;
+      } else if (!docSnap.metadata.fromCache) {
+        appData = { 
+          schedule: initialScheduleData, 
+          dividas: initialDividasData, 
+          pessoas: initialPeopleData, 
+          checks: initialChecksData 
+        };
+        isLoadedFromServer = true;
         saveToFirebase();
       }
       renderApp();
     }, (err) => {
       console.error("Erro do Firestore: ", err);
-      showAlert("❌ Erro ao conectar no Firebase: " + err.message);
+      showAlert("⚠️ <b>Atenção:</b> Erro de conexão com o Firebase (" + err.message + "). Verifique se as regras do Firestore expiraram no Console!");
     });
 
-    async function saveToFirebase() {
+    async function saveToFirebase(force = false) {
+      if (!isLoadedFromServer && !force) return;
       try {
         await setDoc(docRef, {
           schedule: appData.schedule,
           dividas: appData.dividas,
           pessoas: appData.pessoas,
           checks: appData.checks
-        }, { merge: true });
+        });
       } catch (e) {
         console.error("Erro ao gravar:", e);
         showAlert("❌ Erro ao salvar no Firebase: " + e.message);
@@ -412,6 +436,56 @@
     }
 
     window.refreshApp = () => window.location.reload();
+
+    // EXPORTAR E IMPORTAR BACKUP
+    window.exportBackup = () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "backup_financeiro_" + new Date().toISOString().slice(0,10) + ".json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    };
+
+    window.triggerImportBackup = () => {
+      document.getElementById("import-file-input").click();
+    };
+
+    window.handleImportBackup = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          
+          if (!importedData.schedule || !Array.isArray(importedData.schedule)) {
+            alert("Ficheiro inválido. Certifique-se de que selecionou um ficheiro .json gerado pelo botão Backup.");
+            return;
+          }
+
+          if (confirm("Isto irá substituir os dados atuais pelos dados do ficheiro de backup. Deseja continuar?")) {
+            appData = {
+              schedule: importedData.schedule || [],
+              dividas: importedData.dividas || [],
+              pessoas: importedData.pessoas || initialPeopleData,
+              checks: importedData.checks || {}
+            };
+            isLoadedFromServer = true;
+            await saveToFirebase(true);
+            renderApp();
+            alert("✅ Backup restaurado e guardado na nuvem com sucesso!");
+          }
+        } catch (err) {
+          alert("❌ Erro ao ler o ficheiro JSON: " + err.message);
+        } finally {
+          event.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    };
 
     // GERENCIAMENTO DE PESSOAS / CREDORES
     window.openPeopleModal = () => {
@@ -464,7 +538,7 @@
       }
     };
 
-    // MODAL ADICIONAR ITEM AO MÊS (COM OPÇÃO DE PESSOA)
+    // MODAL ADICIONAR ITEM AO MÊS
     window.openAddItemModal = (monthId) => {
       const optionsPessoas = (appData.pessoas || []).map(p => `<option value="${p}">${p}</option>`).join('');
 
@@ -497,9 +571,7 @@
 
     window.toggleCustomItemPerson = (val) => {
       const customInput = document.getElementById("item-person-custom");
-      if (customInput) {
-        customInput.style.display = val === "__custom__" ? "block" : "none";
-      }
+      if (customInput) customInput.style.display = val === "__custom__" ? "block" : "none";
     };
 
     window.saveNewItem = async (monthId) => {
@@ -516,26 +588,19 @@
       let person = personSelect;
       if (personSelect === "__custom__") {
         person = personCustom;
-        if (person && !appData.pessoas.includes(person)) {
-          appData.pessoas.push(person);
-        }
+        if (person && !appData.pessoas.includes(person)) appData.pessoas.push(person);
       }
 
       const month = appData.schedule.find(m => m.id === monthId);
       if (month) {
         if (!month.items) month.items = [];
-        month.items.push({
-          id: "item_" + Date.now(),
-          title,
-          val,
-          person: person || ""
-        });
+        month.items.push({ id: "item_" + Date.now(), title, val, person: person || "" });
         await saveToFirebase();
       }
       closeModal();
     };
 
-    // MODAL EDITAR ITEM DO MÊS (COM OPÇÃO DE PESSOA)
+    // MODAL EDITAR ITEM DO MÊS
     window.openEditItemModal = (monthId, itemId) => {
       const month = appData.schedule.find(m => m.id === monthId);
       if (!month) return;
@@ -575,9 +640,7 @@
 
     window.toggleCustomEditItemPerson = (val) => {
       const customInput = document.getElementById("edit-item-person-custom");
-      if (customInput) {
-        customInput.style.display = val === "__custom__" ? "block" : "none";
-      }
+      if (customInput) customInput.style.display = val === "__custom__" ? "block" : "none";
     };
 
     window.saveEditItem = async (monthId, itemId) => {
@@ -594,9 +657,7 @@
       let person = personSelect;
       if (personSelect === "__custom__") {
         person = personCustom;
-        if (person && !appData.pessoas.includes(person)) {
-          appData.pessoas.push(person);
-        }
+        if (person && !appData.pessoas.includes(person)) appData.pessoas.push(person);
       }
 
       const month = appData.schedule.find(m => m.id === monthId);
@@ -665,9 +726,7 @@
 
     window.toggleCustomPerson = (val) => {
       const customInput = document.getElementById("debt-person-custom");
-      if (customInput) {
-        customInput.style.display = val === "__custom__" ? "block" : "none";
-      }
+      if (customInput) customInput.style.display = val === "__custom__" ? "block" : "none";
     };
 
     window.saveNewDebt = async () => {
@@ -678,9 +737,7 @@
       let person = personSelect;
       if (personSelect === "__custom__") {
         person = personCustom;
-        if (person && !appData.pessoas.includes(person)) {
-          appData.pessoas.push(person);
-        }
+        if (person && !appData.pessoas.includes(person)) appData.pessoas.push(person);
       }
 
       const kwInput = document.getElementById("debt-kw").value.trim();
@@ -767,9 +824,7 @@
 
     window.toggleCustomPersonEdit = (val) => {
       const customInput = document.getElementById("edit-debt-person-custom");
-      if (customInput) {
-        customInput.style.display = val === "__custom__" ? "block" : "none";
-      }
+      if (customInput) customInput.style.display = val === "__custom__" ? "block" : "none";
     };
 
     window.saveEditDebt = async (debtId) => {
@@ -780,9 +835,7 @@
       let person = personSelect;
       if (personSelect === "__custom__") {
         person = personCustom;
-        if (person && !appData.pessoas.includes(person)) {
-          appData.pessoas.push(person);
-        }
+        if (person && !appData.pessoas.includes(person)) appData.pessoas.push(person);
       }
 
       const kwInput = document.getElementById("edit-debt-kw").value.trim();
@@ -909,7 +962,7 @@
         <h3>Copiar Mês: ${lastMonth.title}</h3>
         <div class="form-group">
           <label>Nome do Novo Mês (Projeção)</label>
-          <input type="text" id="copy-month-title" placeholder="Ex: 5 de Março / 2027" required />
+          <input type="text" id="copy-month-title" placeholder="Ex: 5 de Dezembro" required />
         </div>
         <div class="form-group">
           <label>Observações/Notas do Novo Mês (Opcional)</label>
@@ -1147,9 +1200,7 @@
         (month.incomes || []).forEach(inc => {
           const val = inc.val || 0;
           totalRecebidoMes += val;
-          if (inc.received) {
-            totalRecebidoConfirmado += val;
-          }
+          if (inc.received) totalRecebidoConfirmado += val;
         });
 
         (month.items || []).forEach(item => {
@@ -1236,7 +1287,8 @@
                         onChange="toggleCheck('${item.id}', '${safeTitle}')"
                       />
                       <div>
-                        <span class="item-title">${item.title}</span>${item.person ? `<br/><span class="info-badge badge-person">👤 ${item.person}</span>` : ''}
+                        <span class="item-title">${item.title}</span>
+                        ${item.person ? `<br/><span class="info-badge badge-person">👤 ${item.person}</span>` : ''}
                       </div>
                     </div>
                     <div class="actions-cell">
